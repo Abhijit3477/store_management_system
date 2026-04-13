@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Store Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css" />
+</head>
+<body class="split-body">
+    <div class="split-container">
+        <!-- Left Panel -->
+        <div class="split-left">
+            <div class="sphere sphere-1"></div>
+            <div class="sphere sphere-2"></div>
+            <div class="split-content">
+                <h2>Welcome Back</h2>
+                <h1>Log in to your account to continue.</h1>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="split-right">
+            <div class="form-wrapper">
+                <h3>Sign in</h3>
+                <p class="subtitle">Log in to your account to continue.</p>
+                
+                <form th:action="@{/login}" method="post">
+                    <div class="input-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="color: rgba(255,255,255,0.4); position: absolute; left: 20px; top: 18px; width: 22px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <input type="text" id="username" name="username" class="input-field" placeholder="Username or E-mail" required autofocus />
+                    </div>
+                    
+                    <div class="input-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="color: rgba(255,255,255,0.4); position: absolute; left: 20px; top: 18px; width: 22px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                        <input type="password" id="password" name="password" class="input-field" placeholder="Password" required />
+                        <span class="show-password" onclick="togglePassword()" style="font-size: 0.7rem; color: var(--saas-primary); letter-spacing: 1px; top: 22px;">SHOW</span>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 2rem;">
+                        <a th:href="@{/forgot-password}" style="color: var(--saas-primary); text-decoration: none; font-weight: 600; font-size: 0.85rem;">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-signin">Login</button>
+                    
+                    <div class="divider">OR CONTINUE WITH</div>
+                    
+                    <div class="social-grid">
+                        <a href="#" class="btn-social">
+                            <svg style="width:18px;height:18px" viewBox="0 0 24 24"><path fill="currentColor" d="M12.48 10.92v3.28h4.74c-.2 1.22-.92 2.26-1.89 3.03l2.73 2.1c1.6-1.48 2.52-3.65 2.52-6.19 0-.44-.04-.88-.12-1.22H12.48Z"/><path fill="currentColor" d="M12.48 24c3.24 0 5.97-1.07 7.96-2.91L17.71 19c-1.1.74-2.5 1.18-5.23 1.18-4.04 0-7.46-2.73-8.68-6.4l-2.84 2.19C2.96 19.89 7.32 24 12.48 24Z"/><path fill="currentColor" d="M3.8 13.78c-.31-.92-.48-1.9-.48-2.92s.17-2 .48-2.92l-2.84-2.19c-.66 1.33-1.04 2.82-1.04 4.4 0 1.58.38 3.07 1.04 4.4l2.84-1.77Z"/><path fill="currentColor" d="M12.48 3.82c1.76 0 3.34.6 4.58 1.8l3.44-3.44C18.39 1.04 15.65 0 12.48 0 7.32 0 2.96 4.11 1.96 10l2.84 2.19c1.22-3.67 4.64-6.4 8.68-6.4Z"/></svg>
+                            Continue With Google
+                        </a>
+                        <a href="#" class="btn-social">
+                            <svg style="width:18px;height:18px" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07c0 6.03 4.42 11.02 10.12 12V15.56H7.13v-3.49h2.99V9.41c0-2.95 1.75-4.58 4.45-4.58 1.29 0 2.65.23 2.65.23v2.91h-1.49c-1.46 0-1.92.91-1.92 1.84v2.21h3.28l-.53 3.49h-2.75V24.07c5.7-.98 10.12-5.97 10.12-12z"/></svg>
+                            Continue With Facebook
+                        </a>
+                        <a href="#" class="btn-social">
+                            <svg style="width:18px;height:18px" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.045 4.126H5.078z"/></svg>
+                            Continue With Twitter
+                        </a>
+                    </div>
+                </form>
+                
+                <div class="split-footer" style="margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.4);">
+                    Don't Have An Account? <a th:href="@{/register}" style="color: var(--saas-primary); font-weight: 700; text-decoration: none;">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function togglePassword() {
+            const p = document.getElementById('password');
+            const s = document.querySelector('.show-password');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            s.textContent = p.type === 'password' ? 'SHOW' : 'HIDE';
+        }
+    </script>
+</body>
+</html>

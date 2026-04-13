@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Store Manager PRO</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
+</head>
+<body class="split-body" style="display: block; min-height: 100vh; background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 100%) !important;">
+    <header class="app-header animate-down">
+        <div class="app-brand">
+            <div class="brand-icon">S</div>
+            STORE MANAGER <span style="color: var(--primary); font-weight: 400; margin-left: 2px;">PRO</span>
+        </div>
+        
+        <nav class="app-nav">
+            <ul>
+                <li><a href="#" class="active" onclick="showSection('products')">Dashboard</a></li>
+                <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}"><a href="#" onclick="showSection('logs')">Analytics</a></li>
+                <li><a href="#" onclick="showSection('profile')">Profile</a></li>
+                <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}"><a href="#" onclick="showSection('team')">Team</a></li>
+                <li th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''MANAGER'')')}"><a href="#" onclick="showSection('crm')">CRM</a></li>
+                <li><a href="#" onclick="showSection('sales')">Sales</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-actions">
+            <div class="user-profile-toggle" onclick="showSection('profile')">
+                <div class="avatar">A</div>
+                <div style="text-align: left;">
+                    <p style="font-size: 0.8rem; font-weight: 700; line-height: 1;" id="headerUsername">Admin</p>
+                    <p style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">Online Now</p>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">
+                    <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <div class="dashboard-grid">
+            <!-- Summary Stats -->
+            <section class="section-card animate-up" style="grid-column: span 3;">
+                <h2 style="border: none; margin: 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Real-Time Inventory</h2>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
+                    <div id="totalProductsCount" style="font-size: 2.5rem; font-weight: 800;">0</div>
+                    <div style="color: var(--success); font-weight: 700; font-size: 0.9rem;">+12% <span style="font-weight: 400;">this week</span></div>
+                </div>
+            </section>
+            
+            <section class="section-card animate-up" style="grid-column: span 3; animation-delay: 0.1s;">
+                <h2 style="border: none; margin: 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Critical Alerts</h2>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
+                    <div id="lowStockCount" style="font-size: 2.5rem; font-weight: 800; color: var(--danger);">0</div>
+                    <div style="color: var(--danger); font-weight: 700; font-size: 0.9rem;">Urgent <span style="font-weight: 400;">Restock</span></div>
+                </div>
+            </section>
+
+            <section class="section-card animate-up" style="grid-column: span 3; animation-delay: 0.15s;">
+                <h2 style="border: none; margin: 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Today's Revenue</h2>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
+                    <div style="font-size: 2.5rem; font-weight: 800;">$4.2k</div>
+                    <div style="color: var(--success); font-weight: 700; font-size: 0.9rem;">+5.4% <span style="font-weight: 400;">v yesterday</span></div>
+                </div>
+            </section>
+
+            <section class="section-card animate-up" style="grid-column: span 3; animation-delay: 0.2s;">
+                <h2 style="border: none; margin: 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Customer Growth</h2>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
+                    <div style="font-size: 2.5rem; font-weight: 800;">1.8k</div>
+                    <div style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">Active <span style="font-weight: 400;">Accts</span></div>
+                </div>
+            </section>
+            
+            <!-- Activity Logs (Admin Only) -->
+            <section id="logs" class="section-card animate-up" style="grid-column: span 12; display: none;" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <h2>📊 Intelligence & Activity Logs</h2>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>IDENTITY</th>
+                                <th>PROTOCOL</th>
+                                <th>METADATA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Team Members (Admin Only) -->
+            <section id="team" class="section-card animate-up" style="grid-column: span 12; display: none;" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem; border: none;">Team Intelligence</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Monitor and manage employee access protocols.</p>
+                    </div>
+                    <button onclick="addSimpleUser()" class="btn-signin" style="width: auto; padding: 10px 20px; font-size: 0.8rem;">+ Quick Add User</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>IDENTITY</th>
+                                <th>EMAIL</th>
+                                <th>ACCESS LEVEL</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- CRM Section -->
+            <section id="crm" class="section-card animate-up" style="grid-column: span 12; display: none;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Total Clients</p>
+                        <h3 id="crmTotalCount" style="font-size: 1.5rem; margin:0;">0</h3>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Active Loyalty</p>
+                        <h3 id="crmTotalPoints" style="font-size: 1.5rem; margin:0; color: var(--success);">0 pts</h3>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem; border: none;">Client Relations</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Manage your customer database and loyalty programs.</p>
+                    </div>
+                    <button onclick="openCustomerModal()" class="btn-signin" style="width: auto; padding: 10px 20px; font-size: 0.8rem;">+ New Customer</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>CLIENT</th>
+                                <th>CONTACT</th>
+                                <th>LOYALTY</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crmTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sales History Section -->
+            <section id="sales" class="section-card animate-up" style="grid-column: span 12; display: none;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Sales Count</p>
+                        <h3 id="salesTotalCount" style="font-size: 1.5rem; margin:0;">0</h3>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Gross Revenue</p>
+                        <h3 id="salesTotalRevenue" style="font-size: 1.5rem; margin:0; color: var(--success);">$0.00</h3>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem; border: none;">Transaction Ledger</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Real-time audit of all store sales and returns.</p>
+                    </div>
+                    <button onclick="refreshDashboard()" class="badge badge-primary" style="border:none; cursor:pointer; padding: 10px 15px;">Refresh Audit</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>SALE ID</th>
+                                <th>DATE</th>
+                                <th>ITEMS</th>
+                                <th>TOTAL VALUE</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- My Profile -->
+            <section id="profile" class="section-card animate-up" style="grid-column: span 12; display: none;">
+                <h2>👤 Employee Identity</h2>
+                <div style="display: flex; gap: 4rem; padding: 2rem 0;">
+                    <div style="width: 140px; height: 140px; border-radius: 20px; background: linear-gradient(135deg, #f1f5f9, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                        👤
+                    </div>
+                    <div style="flex: 1; max-width: 600px;">
+                        <h3 id="profileName" style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Identified User</h3>
+                        <p id="profileRole" style="display: inline-block; padding: 6px 12px; background: #eef2ff; color: var(--primary); border-radius: 8px; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 2.5rem;">ACCESS LEVEL</p>
+                        
+                        <form id="profileForm" onsubmit="updateProfile(event)">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="input-container">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Full Name</label>
+                                    <input type="text" id="editFullName" class="input-field" placeholder="Full Name" style="padding-left: 16px;">
+                                </div>
+                                <div class="input-container">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Contact Number</label>
+                                    <input type="text" id="editPhone" class="input-field" placeholder="Contact" style="padding-left: 16px;">
+                                </div>
+                            </div>
+                            <div class="input-container" style="margin-top: 1rem;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Work Address</label>
+                                <input type="text" id="editAddress" class="input-field" placeholder="Full Address" style="padding-left: 16px;">
+                            </div>
+                            <button type="submit" class="btn-signin" style="width: auto; padding: 12px 30px;">Save Profile Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Catalog Table -->
+            <section id="products" class="section-card animate-up" style="grid-column: span 12;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem; border: none;">
+                            Inventory Assets 
+                            <span id="productCountBadge" class="badge badge-primary" style="font-size: 0.75rem; vertical-align: middle; margin-left: 10px;">0 Records</span>
+                            <span id="totalValueBadge" class="badge badge-success" style="font-size: 0.75rem; vertical-align: middle; margin-left: 5px; opacity: 0.9;">Valuation: $0.00</span>
+                        </h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Manage your products and real-time stock levels.</p>
+                    </div>
+                     <div style="display: flex; gap: 0.8rem; align-items: center;">
+                          <div class="input-container" style="margin-bottom:0;">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                             <input type="text" id="productSearch" class="input-field" placeholder="Search..." style="width: 180px;">
+                          </div>
+                          
+                          <select id="categoryFilter" class="input-field" style="width: 150px; padding-left: 12px; height: 44px; margin-top:0;">
+                              <option value="ALL">All Categories</option>
+                          </select>
+
+                          <button id="lowStockToggle" onclick="toggleLowStockFilter()" class="btn-other" style="width: auto; padding: 10px 15px; margin-top:0; border-radius: 10px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+                              <span id="lowStockStatus" style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
+                              Low Stock Only
+                          </button>
+
+                          <button onclick="openAddProductModal()" class="btn-signin" style="margin-top:0; width:auto; padding: 10px 15px;">+ Create</button>
+                     </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ASSET</th>
+                                <th>PRODUCT & SPECS</th>
+                                <th>CATEGORY</th>
+                                <th style="cursor:pointer;" onclick="setSort('price')">PRICE <span id="sort-price" style="font-size:0.6rem;"></span></th>
+                                <th style="cursor:pointer;" onclick="setSort('stock')">STOCK <span id="sort-stock" style="font-size:0.6rem;"></span></th>
+                                <th>BARCODE</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal for Add/Edit Product -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-content animate-scale">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create Asset</h2>
+                <p id="modalSubtitle" style="color: var(--text-muted); font-size: 0.9rem;">Enter product specifications below</p>
+            </div>
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <input type="hidden" id="prodId">
+                <div class="input-container">
+                    <input type="text" id="prodName" class="input-field" placeholder="Asset Name" required style="padding-left: 16px;">
+                </div>
+                <div class="input-container">
+                    <textarea id="prodDesc" class="input-field" placeholder="Detailed Specifications" style="padding-left: 16px; min-height: 100px; padding-top: 12px;"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                     <div class="input-container">
+                        <input type="number" step="0.01" id="prodPrice" class="input-field" placeholder="Price ($)" required style="padding-left: 16px;">
+                    </div>
+                    <div class="input-container">
+                        <input type="number" id="prodStock" class="input-field" placeholder="Initial Units" required style="padding-left: 16px;">
+                    </div>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="prodCategory" class="input-field" placeholder="Category Type" style="padding-left: 16px;">
+                </div>
+                <div class="input-container" style="margin-bottom: 2rem;">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">Asset Image</label>
+                    <input type="file" id="prodImage" class="input-field" accept="image/*" style="padding-left: 16px; padding-top: 10px;">
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeProductModal()" class="btn-other" style="padding: 12px 24px;">Cancel</button>
+                    <button type="submit" class="btn-signin" style="width: auto; padding: 12px 30px; margin-top:0;">Save Asset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div id="customerModal" class="modal-overlay">
+        <div class="modal-content animate-scale">
+            <h2 id="custModalTitle">Register Customer</h2>
+            <form id="customerForm" onsubmit="saveCustomer(event)">
+                <input type="hidden" id="custId">
+                <div class="input-container">
+                    <input type="text" id="custName" class="input-field" placeholder="Full Name" required style="padding-left: 16px;">
+                </div>
+                <div class="input-container">
+                    <input type="email" id="custEmail" class="input-field" placeholder="Email Address" required style="padding-left: 16px;">
+                </div>
+                <div class="input-container">
+                    <input type="text" id="custPhone" class="input-field" placeholder="Phone Number" style="padding-left: 16px;">
+                </div>
+                <div class="input-container">
+                    <textarea id="custAddress" class="input-field" placeholder="Physical Address" style="padding-left: 16px; min-height: 80px; padding-top: 10px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+                    <button type="button" onclick="closeCustomerModal()" class="btn-other" style="padding: 10px 20px;">Cancel</button>
+                    <button type="submit" class="btn-signin" style="width: auto; padding: 10px 24px; margin: 0;">Register Identity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sale Details Modal -->
+    <div id="saleDetailModal" class="modal-overlay">
+        <div class="modal-content animate-scale" style="max-width: 600px; padding: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 id="saleDetailTitle" style="margin: 0; border: none; font-size: 1.5rem;">Sale Audit</h2>
+                <button onclick="closeSaleDetailModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="saleDetailContent"></div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button class="btn-signin" onclick="window.print()" style="width: auto; padding: 10px 20px; margin: 0;">Print Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/script.js}" src="/js/script.js"></script>
+</body>
+</html>

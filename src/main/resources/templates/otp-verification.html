@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Store Manager</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
+    <style>
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        .otp-input {
+            width: 45px;
+            height: 55px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .otp-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+    </style>
+</head>
+<body class="split-body">
+    <div class="split-container">
+        <!-- Left Panel -->
+        <div class="split-left">
+            <div class="sphere sphere-1"></div>
+            <div class="sphere sphere-2"></div>
+            <div class="split-content">
+                <h2>Secure Access</h2>
+                <h1>Verify your identity to proceed.</h1>
+                <p>Protecting your workspace is our priority. We've sent a 6-digit code to your registered device for multi-factor authentication.</p>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="split-right">
+            <div class="form-wrapper">
+                <h3>Verification</h3>
+                <p class="subtitle">Enter the OTP sent to your account</p>
+                
+                <form th:action="@{/verify-otp}" method="post">
+                    <div class="input-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="color: rgba(255,255,255,0.4); position: absolute; left: 20px; top: 18px; width: 22px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                        <input type="text" maxlength="6" name="otp" class="input-field" placeholder="000000" style="text-align: center; font-size: 1.8rem; letter-spacing: 12px; font-weight: 800;" required autofocus>
+                    </div>
+                    
+                    <button type="submit" class="btn-signin">Verify & Launch Dashboard</button>
+                    
+                    <div style="margin-top: 2.5rem; text-align: center;">
+                        <p style="color: rgba(255,255,255,0.4); font-size: 0.9rem;">
+                            Didn't receive the code? 
+                            <a th:href="@{/resend-otp}" id="resendBtn" style="color: var(--saas-primary); font-weight: 700; text-decoration: none;">Resend OTP</a>
+                            <span id="timerDisplay" style="display: none; color: rgba(255,255,255,0.3); font-weight: 600;"> (Wait <span id="seconds">30</span>s)</span>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        const resendBtn = document.getElementById('resendBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const secondsSpan = document.getElementById('seconds');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('resent')) {
+            startTimer();
+        }
+
+        function startTimer() {
+            resendBtn.style.pointerEvents = 'none';
+            resendBtn.style.opacity = '0.5';
+            timerDisplay.style.display = 'inline';
+            let timeLeft = 30;
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                secondsSpan.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    resendBtn.style.pointerEvents = 'auto';
+                    resendBtn.style.opacity = '1';
+                    timerDisplay.style.display = 'none';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

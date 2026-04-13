@@ -1,0 +1,10 @@
+package com.example.storemanagement.repository;
+
+import com.example.storemanagement.entity.ActivityLog;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
+    List<ActivityLog> findByUsernameOrderByTimestampDesc(String username);
+    List<ActivityLog> findAllByOrderByTimestampDesc();
+}
